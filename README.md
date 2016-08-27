@@ -19,6 +19,26 @@ libraries/headers/folders/executables, only links will be generated at the
 installation site. This the installation behaves as if one would run __make install__
 after every change in the original code.
 
+### Installation
+
+It's easiest if you just copy the *.cmake files to some location and then use the lines:
+  
+    set(CMAKE_MODULE_PATH "install_location")
+    include(softinstall)
+    include(explicit_instantiation)
+
+You can also use cmake for the installation:
+
+    mkdir build
+    cd build
+    cmake "path_to_this_repo" -DCMAKE_INSTALL_PREFIX="install_location"
+    make install
+
+or even:
+
+    make softinstall
+    
+To only install the files with links to the ones in the repository.
 
 See the beginning of the corresponding source files for the detailed usage/documentation.
 
