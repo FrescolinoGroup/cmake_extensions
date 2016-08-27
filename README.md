@@ -27,6 +27,7 @@ It's easiest if you just copy the *.cmake files to some location and then use th
     include(softinstall)
     include(explicit_instantiation)
 
+at the beginning of your CMakeLists.txt file.
 You can also use cmake for the installation:
 
     mkdir build
