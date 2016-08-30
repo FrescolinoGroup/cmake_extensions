@@ -3,6 +3,8 @@
 This module provides extensions to the functionality of __CMake__. Consult the
 beginning of the corresponding source files for detailed usage/documentation.
 
+TODO: load ## lines into this file, after properly figuring out # -  and ##
+
 ### Explicit Instantiation (explicit_instantiation.cmake)
 
 Drastically reduce recompilation time of template-heavy __C++__ code by
@@ -35,9 +37,9 @@ If this path is not yet in the CMake module path, add to CMakeLists.txt:
 
     set(CMAKE_MODULE_PATH /path/to/cmakescripts)
 
-And then include the desired script with:
+And then include the desired script (e.g. softinstall) with:
 
-    include(fsc/softinstall)
+    include(fsc/softinstall.cmake)
 
 ## Miscellaneous
 

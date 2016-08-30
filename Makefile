@@ -25,7 +25,7 @@ bslas := \$(empty)
 ifneq ($(filter $(firstword $(MAKECMDGOALS)),$(TARGETS_WITH_PARAMS)),)
     PARAMS := $(wordlist 2, $(words $(MAKECMDGOALS)), $(MAKECMDGOALS))
 
-#~     ONE_PARAM_TOGGLE_HACK = 1
+    ONE_PARAM_TOGGLE_HACK = 1
     ifeq ($(ONE_PARAM_TOGGLE_HACK),1)
         PARAMS := $(subst $(space),$(e_spc),$(PARAMS))
         bslas := $(empty)
@@ -35,7 +35,7 @@ ifneq ($(filter $(firstword $(MAKECMDGOALS)),$(TARGETS_WITH_PARAMS)),)
     $(foreach elem, $(PARAMS),\
         $(eval $(subst {},$(bslas)$(e_spc),$(elem)):;@:)\
     )
-    PARAMS := $(subst {},$(bslas)$(e_spc),$(strip $(PARAMS)))
+    PARAMS := $(subst {},$(bslas)$(e_spc),$(PARAMS))
 endif
 ################################################################################
 
