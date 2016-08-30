@@ -1,10 +1,8 @@
 ## Provides a function that generates a target called "softinstall" along the
 ## "install" target that uses links instead of copies to install. 
 ##
-## Signature:
+## Signature (modeled after the install function, see CMake Documentation):
 ##   install2([TARGETS|FILES|DIRECTORY] objet1 object2 ... DESTINATION dest)
-##
-##   identical signature as install (see CMake Documentation), 
 ##
 ## Example:
 ##   install2(TARGETS lib1 lib2 DESTINATION bin)
@@ -20,23 +18,22 @@
 ##
 ## TODO: maybe support more install parameters/signatures
 ##
-################################################################################
-##
-## Copyright (C) 2016 C. Frescolino, Mario Könz, Donjan Rodic
-##
-## Licensed under the Apache License, Version 2.0 (the "License");
-## you may not use this file except in compliance with the License.
-## You may obtain a copy of the License at
-##
-##   http://www.apache.org/licenses/LICENSE-2.0
-##
-## Unless required by applicable law or agreed to in writing, software
-## distributed under the License is distributed on an "AS IS" BASIS,
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-## See the License for the specific language governing permissions and
-## limitations under the License.
-##
-################################################################################
+# ##############################################################################
+#
+# Copyright (C) 2016 C. Frescolino, Mario Könz, Donjan Rodic
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ##############################################################################
 
 # define a softinstall target (dependencies will be added later)
 add_custom_target(softinstall)
