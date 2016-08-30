@@ -4,77 +4,47 @@
 ##   explicit_inst( target source obj1 [ obj2 [ ... ] ] )
 ##   explicit_inst( "target1 target2 ..." source obj1 [ obj2 [ ... ] ] )
 ##
+## The first parameter is the target against which the instantiated objects
+## are to be linked. It can be passed in quotes as a list of multiple targets.
 ## The source parameter should be a header file where the class definition (not
-## just declaration) is known. The third and further parameters are the targets
-## against which the instantiated objects should be linked.
+## just declaration) is known. The third and further parameters are the objects
+## to be explicitly instantiated.
 ##
 ## Example:
-##   explicit_inst("main1 main2" ./src/A.hpp A<int>)
+##   explicit_inst("main lib1 lib2" ./src/A.hpp A<int> A<char>)
 ##
 ## Recommendation: do this in proximity of setting the compiler switches.
 ##
-## TODO: compare with precompiled headers (.gch in gcc 3.4+, .pch in clang)
-##       gives huge files but saves picking types, can be injected with -include
-##       work around constraints: https://gcc.gnu.org/onlinedocs/gcc/Precompiled-Headers.html
+## The instantiation can be toggled with the FSC_EXPLICIT_INST switch (default:
+## ON).
 ##
-## TODO: try to drop source or targets?
-## but then which file to modify for inclusion of the _INSTANCE.hpp?
-## would also require fetching all cmake targets.
-##   explicit_inst(src/A.hpp A<int>) => too little info
-##   explicit_inst(main A<int>) => ambiguity
-##
-################################################################################
-##
-## Copyright (C) 2016 C. Frescolino, Donjan Rodic, Mario Könz
-##
-## Licensed under the Apache License, Version 2.0 (the "License");
-## you may not use this file except in compliance with the License.
-## You may obtain a copy of the License at
-##
-##   http://www.apache.org/licenses/LICENSE-2.0
-##
-## Unless required by applicable law or agreed to in writing, software
-## distributed under the License is distributed on an "AS IS" BASIS,
-## WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-## See the License for the specific language governing permissions and
-## limitations under the License.
-##
-################################################################################
-execute_process(COMMAND cmake --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
-
-# Convert command output into a CMake list
-STRING(REGEX REPLACE ";" "\\\\;" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
-STRING(REGEX REPLACE "\n" ";" CMAKE_PROPERTY_LIST "${CMAKE_PROPERTY_LIST}")
-
-function(print_properties)
-    message ("CMAKE_PROPERTY_LIST")
-    foreach(elem IN LISTS CMAKE_PROPERTY_LIST)
-        message ("   ${elem}")
-    endforeach(elem)
-endfunction(print_properties)
-
-function(print_target_properties tgt)
-    if(NOT TARGET ${tgt})
-      message("There is no target named '${tgt}'")
-      return()
-    endif()
-
-    foreach (prop ${CMAKE_PROPERTY_LIST})
-        string(REPLACE "<CONFIG>" "${CMAKE_BUILD_TYPE}" prop ${prop})
-        # message ("Checking ${prop}")
-        if(NOT ("${prop}" STREQUAL "LOCATION" OR  # hack for newer cmake lacking location
-              "${prop}" STREQUAL "LOCATION_" OR
-              "${prop}" STREQUAL "MACOSX_PACKAGE_LOCATION" OR
-              "${prop}" STREQUAL "VS_DEPLOYMENT_LOCATION"))
-            get_property(propval TARGET ${tgt} PROPERTY ${prop} SET)
-            if (propval)
-                get_target_property(propval ${tgt} ${prop})
-                message ("${tgt} ${prop} = ${propval}")
-            endif()
-        endif()
-    endforeach(prop)
-endfunction(print_target_properties)
-
+# TODO: compare with precompiled headers (.gch in gcc 3.4+, .pch in clang)
+#       gives huge files but saves picking types, can be injected with -include
+#       work around constraints: https://gcc.gnu.org/onlinedocs/gcc/Precompiled-Headers.html
+#
+# TODO: try to drop source or targets?
+# but then which file to modify for inclusion of the _INSTANCE.hpp?
+# would also require fetching all cmake targets.
+#   explicit_inst(src/A.hpp A<int>) => too little info
+#   explicit_inst(main A<int>) => ambiguity
+#
+# ##############################################################################
+#
+# Copyright (C) 2016 C. Frescolino, Donjan Rodic, Mario Könz
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ##############################################################################
 
 option(FSC_EXPLICIT_INST "Enable/disable explicit instantiation" ON)
 

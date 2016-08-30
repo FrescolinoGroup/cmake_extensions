@@ -1,10 +1,8 @@
 ## Provides a function that generates a target called "softinstall" along the
 ## "install" target that uses links instead of copies to install. 
 ##
-## Signature:
+## Signature (modeled after the install function, see CMake Documentation):
 ##   install2([TARGETS|FILES|DIRECTORY] objet1 object2 ... DESTINATION dest)
-##
-##   identical signature as install (see CMake Documentation), 
 ##
 ## Example:
 ##   install2(TARGETS lib1 lib2 DESTINATION bin)
