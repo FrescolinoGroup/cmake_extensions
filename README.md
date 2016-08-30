@@ -39,7 +39,7 @@ If this path is not yet in the CMake module path, add to CMakeLists.txt:
 
 And then include the desired script (e.g. softinstall) with:
 
-    include(fsc/softinstall.cmake)
+    include(fsc/softinstall)
 
 ## Miscellaneous
 
