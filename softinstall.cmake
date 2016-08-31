@@ -86,13 +86,13 @@ function(install2 obj_type) # remaining parameter are in ${ARGN}
             # (ugly, but I didn't find a cmake routine that yields the name)
             get_target_property(type ${obj} TYPE)
             if(${type} STREQUAL STATIC_LIBRARY)
-                set(obj "lib${obj}.a")
+                set(fname "lib${obj}.a")
             elseif(${type} STREQUAL SHARED_LIBRARY)
-                set(obj "lib${obj}.so")
+                set(fname "lib${obj}.so")
             # todo: MODULE_LIBRARY
             endif()
 
-            get_filename_component(obj ${obj} ABSOLUTE)
+            get_filename_component(obj ${fname} ABSOLUTE)
 
             # Find the relative path from source to the project source dir...
             file(RELATIVE_PATH relfile ${PROJECT_SOURCE_DIR} ${obj})
@@ -101,6 +101,7 @@ function(install2 obj_type) # remaining parameter are in ${ARGN}
 
         elseif(${obj_type} STREQUAL FILES OR ${obj_type} STREQUAL DIRECTORY)
             get_filename_component(obj ${obj} ABSOLUTE)
+            get_filename_component(fname ${obj} NAME)
         endif()
         
         # create some unique name as target
@@ -108,7 +109,17 @@ function(install2 obj_type) # remaining parameter are in ${ARGN}
         
         # the target is built by a ln -s
         # policy: OVERWRITE link/file if it already exists
-        add_custom_target(${unique_name} COMMAND mkdir -p ${dest} && ln -fs ${obj} ${dest})
+        add_custom_target(${unique_name} COMMAND mkdir -p ${dest} && 
+                                                 ln -fs ${obj} ${dest} && 
+                                                 echo "${dest}/${fname}" >> "${PROJECT_BINARY_DIR}/install_manifest.txt" &&
+                                                 echo "-- Soft Installing: ${dest}/${fname}")
+        
+        # we need to clean install_manifest.txt at the beginning, but just once
+        # that why we have one target that gets executed just once
+        if(NOT TARGET clean_install_manifest_txt)
+            add_custom_target(clean_install_manifest_txt COMMAND : > "${PROJECT_BINARY_DIR}/install_manifest.txt")
+        endif()
+        add_dependencies(${unique_name} clean_install_manifest_txt)
         
         # if the object is not a file but a target, we need to add a dependency
         # (otherwise we will link to a library/executable that we didn't build)
