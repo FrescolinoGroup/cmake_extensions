@@ -5,7 +5,7 @@ beginning of the corresponding source files for detailed usage/documentation.
 
 TODO: load ## lines into this file, after properly figuring out # -  and ##
 
-### Explicit Instantiation (explicit_instantiation.cmake)
+### Explicit Instantiation (explicit_inst.cmake)
 
 Drastically reduce recompilation time of template-heavy __C++__ code by
 instantiating user-specified time-consuming templates in separate compilation
@@ -20,6 +20,10 @@ __CMake__ behaviour, but are also softinstall-enabled: when running __make
 softinstall__, the files will be symlinked instead of copied to their
 destination. This allows for convenient testing without __make install__ after
 every edit on the source tree.
+
+### Uninstall (uninstall.cmake)
+
+Provides an uninstall target to remove installed/soft installed files.
 
 ### Debug Helpers (debug.cmake)
 

@@ -172,7 +172,6 @@ template class ${obj};
 
         set(newdir ${newdir}/${unique_name})
         set(newsource ${newdir}/${fname})
-
         
         foreach(elem ${targets})
             # todo: more elegant way? 
