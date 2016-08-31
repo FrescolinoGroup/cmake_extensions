@@ -109,11 +109,16 @@ function(install2 obj_type) # remaining parameter are in ${ARGN}
         
         # the target is built by a ln -s
         # policy: OVERWRITE link/file if it already exists
-        add_custom_target(${unique_name} COMMAND mkdir -p ${dest} && 
-                                                 ln -fs ${obj} ${dest} && 
-                                                 echo "${dest}/${fname}" >> "${PROJECT_BINARY_DIR}/install_manifest.txt" &&
-                                                 echo "-- Soft Installing: ${dest}/${fname}")
-        
+        add_custom_target(${unique_name} COMMAND
+            # we need to remove the folder (if it is one) since ln does 
+            # not overwrite folders
+            find "${dest}/${fname}" ! -path . -type d | xargs rmdir -p --ignore-fail-on-non-empty {} 2> /dev/null || true &&
+            mkdir -p ${dest} && 
+            ln -fs ${obj} ${dest} &&
+            echo "${dest}/${fname}" >> "${PROJECT_BINARY_DIR}/install_manifest.txt" &&
+            echo "-- Soft Installing: ${dest}/${fname}"
+        )
+
         # we need to clean install_manifest.txt at the beginning, but just once
         # that why we have one target that gets executed just once
         if(NOT TARGET clean_install_manifest_txt)
