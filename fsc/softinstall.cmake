@@ -35,8 +35,35 @@
 #
 # ##############################################################################
 
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/cmake_fsc_softinstall.cmake"
+"
+# make sure that we remove no files or link (i.e. only folders) with rm -rf
+file(READ \"${CMAKE_CURRENT_BINARY_DIR}/fsc_soft_install_collision.txt\" files)
+# remove collision file
+exec_program(${CMAKE_COMMAND} ARGS -E remove \"${CMAKE_CURRENT_BINARY_DIR}/fsc_soft_install_collision.txt\")
+if(NOT \${files} STREQUAL \"\")
+    # remove temporary bash file
+    exec_program(${CMAKE_COMMAND} ARGS -E remove \"${CMAKE_CURRENT_BINARY_DIR}/fsc_soft_install.sh\")
+    message(FATAL_ERROR 
+\"There are files in the folders that would be deleted if the softinstall proceeded!
+\${files}
+Softinstall cannot procede, maybe and install was performed? 
+Uninstall the install first.
+\")
+else()
+    exec_program(/bin/sh ARGS \"${CMAKE_CURRENT_BINARY_DIR}/fsc_soft_install.sh\")
+    # remove temporary bash file
+    exec_program(${CMAKE_COMMAND} ARGS -E remove \"${CMAKE_CURRENT_BINARY_DIR}/fsc_soft_install.sh\")
+endif()
+"
+)
+
 # define a softinstall target (dependencies will be added later)
-add_custom_target(softinstall)
+add_custom_target(softinstall COMMAND
+    ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_fsc_softinstall.cmake
+)
+
+#~ add_custom_target(softinstall)
 
 function(install2 obj_type) # remaining parameter are in ${ARGN}
     
@@ -76,6 +103,7 @@ function(install2 obj_type) # remaining parameter are in ${ARGN}
     
     # set destination and obj_type (i.e. TARGETS/FILE/DIRECTORY)
     set(dest ${CMAKE_INSTALL_PREFIX}/${dest})
+    
     string(TOUPPER ${obj_type} obj_type)
     
     foreach(obj ${objects})
@@ -104,25 +132,34 @@ function(install2 obj_type) # remaining parameter are in ${ARGN}
             get_filename_component(fname ${obj} NAME)
         endif()
         
+        
+        #~ get_filename_component(obj_real ${obj} REALPATH)
+        #~ get_filename_component(dest_real ${dest} REALPATH)
+        
         # create some unique name as target
         string(MAKE_C_IDENTIFIER ${obj} unique_name)
         
-        # the target is built by a ln -s
-        # policy: OVERWRITE link/file if it already exists
         add_custom_target(${unique_name} COMMAND
-            # we need to remove the folder (if it is one) since ln does 
-            # not overwrite folders
-            find "${dest}/${fname}" ! -path . -type d | xargs rmdir -p --ignore-fail-on-non-empty {} 2> /dev/null || true &&
-            mkdir -p ${dest} && 
-            ln -fs ${obj} ${dest} &&
-            echo "${dest}/${fname}" >> "${PROJECT_BINARY_DIR}/install_manifest.txt" &&
-            echo "-- Soft Installing: ${dest}/${fname}"
+            # we need to remove the empty folder 
+            # but aboard installation if we find a file (could be an extension)
+            find "${dest}/${fname}" ! -wholename "${dest}/${fname}" -type l -or -wholename "${dest}/${fname}" -type f >> "${PROJECT_BINARY_DIR}/fsc_soft_install_collision.txt" 2> /dev/null || true &&
+            # prepare the install commands in the fsc_soft_install.sh
+            echo '
+rm -rf ${dest}/${fname}\\n
+mkdir -p ${dest}\\n
+ln -fs ${obj} ${dest}\\n
+echo ${dest}/${fname} >> \"${PROJECT_BINARY_DIR}/install_manifest.txt\"\\n
+echo \"-- Soft Installing: ${dest}/${fname}\"\\n'
+            >> "${PROJECT_BINARY_DIR}/fsc_soft_install.sh"
         )
 
         # we need to clean install_manifest.txt at the beginning, but just once
         # that why we have one target that gets executed just once
+        # also fsc_soft_install.sh and fsc_soft_install_collision.txt
+        # get reset in case the installation was cancelled while running
+        # (and hence the clean-up did not occur)
         if(NOT TARGET clean_install_manifest_txt)
-            add_custom_target(clean_install_manifest_txt COMMAND : > "${PROJECT_BINARY_DIR}/install_manifest.txt")
+            add_custom_target(clean_install_manifest_txt COMMAND : > "${PROJECT_BINARY_DIR}/install_manifest.txt" && : > "${PROJECT_BINARY_DIR}/fsc_soft_install_collision.txt" && : > "${PROJECT_BINARY_DIR}/fsc_soft_install.sh")
         endif()
         add_dependencies(${unique_name} clean_install_manifest_txt)
         
