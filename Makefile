@@ -5,7 +5,7 @@
 #
 # If not using a GNU make v3.8+ compatible, remove the parameter hack below and
 # instead use:
-#   make install DESTDIR=/path/to/project
+#   make install DESTDIR=/path/to/project/cmakescripts
 
 
 TARGETS_WITH_PARAMS = install softinstall
