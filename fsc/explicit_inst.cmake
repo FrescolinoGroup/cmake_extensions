@@ -6,6 +6,8 @@
 ##
 ## The first parameter is the target against which the instantiated objects
 ## are to be linked. It can be passed in quotes as a list of multiple targets.
+## These targets have to include the header with the global syntax
+## (i.e. include <...> instead of #include "...").
 ## The source parameter should be a header file where the class definition (not
 ## just declaration) is known. The third and further parameters are the objects
 ## to be explicitly instantiated.
@@ -91,7 +93,7 @@ template class ${obj};
 
     list(APPEND objects ${ARGN})
 
-    if(NOT ${USE_EXPL_INST})
+    if(NOT ${FSC_EXPLICIT_INST})
         return()
     endif()
 
