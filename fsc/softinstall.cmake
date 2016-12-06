@@ -145,11 +145,11 @@ function(install2 obj_type) # remaining parameter are in ${ARGN}
             find "${dest}/${fname}" ! -wholename "${dest}/${fname}" -type l -or -wholename "${dest}/${fname}" -type f >> "${PROJECT_BINARY_DIR}/fsc_soft_install_collision.txt" 2> /dev/null || true &&
             # prepare the install commands in the fsc_soft_install.sh
             echo '
-rm -rf ${dest}/${fname}\\n
-mkdir -p ${dest}\\n
-ln -fs ${obj} ${dest}\\n
-echo ${dest}/${fname} >> \"${PROJECT_BINARY_DIR}/install_manifest.txt\"\\n
-echo \"-- Soft Installing: ${dest}/${fname}\"\\n'
+rm -rf \"${dest}/${fname}\" &&
+mkdir -p \"${dest}\" &&
+ln -fs \"${obj}\" \"${dest}\" &&
+echo \"${dest}/${fname}\" >> \"${PROJECT_BINARY_DIR}/install_manifest.txt\" &&
+echo \"-- Soft Installing: ${dest}/${fname}\"'
             >> "${PROJECT_BINARY_DIR}/fsc_soft_install.sh"
         )
 
