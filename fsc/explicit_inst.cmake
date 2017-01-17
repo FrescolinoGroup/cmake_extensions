@@ -6,6 +6,8 @@
 ##
 ## The first parameter is the target against which the instantiated objects
 ## are to be linked. It can be passed in quotes as a list of multiple targets.
+## These targets have to include the header with the global syntax
+## (i.e. include <...> instead of #include "...").
 ## The source parameter should be a header file where the class definition (not
 ## just declaration) is known. The third and further parameters are the objects
 ## to be explicitly instantiated.
@@ -27,6 +29,8 @@
 # would also require fetching all cmake targets.
 #   explicit_inst(src/A.hpp A<int>) => too little info
 #   explicit_inst(main A<int>) => ambiguity
+#
+# TODO: does not work if no INCLUDE_DIRECTORIES is stated... (include source_local dir)
 #
 # ##############################################################################
 #
@@ -89,7 +93,7 @@ template class ${obj};
 
     list(APPEND objects ${ARGN})
 
-    if(NOT ${USE_EXPL_INST})
+    if(NOT ${FSC_EXPLICIT_INST})
         return()
     endif()
 
@@ -124,7 +128,8 @@ template class ${obj};
     
 
     # absolute path / relative path
-    if(EXISTS ${source})
+    execute_process(COMMAND ls ${source} RESULT_VARIABLE result OUTPUT_QUIET ERROR_QUIET)
+    if(result)
         #~ message("${source} found with abs/rel path")
         get_filename_component(source ${source} ABSOLUTE)
         get_prefix_list(prefix_list ${source})
@@ -134,9 +139,11 @@ template class ${obj};
         foreach(elem IN LISTS targets)
             if(elem) # solves the problem for a list of length 1
                 GET_TARGET_PROPERTY(incl_dirs ${elem} INCLUDE_DIRECTORIES)
-                find_path(incl_dir ${source} ${incl_dirs})
-                #~ message("${source} found in include_directory ${incl_dir}")
-                list(APPEND source_list ${incl_dir}/${source})
+                if(incl_dirs)
+                    find_path(incl_dir ${source} ${incl_dirs})
+                    #~ message("${source} found in include_directory ${incl_dir}")
+                    list(APPEND source_list ${incl_dir}/${source})
+                endif()
             endif()
         endforeach(elem)
         
@@ -160,8 +167,8 @@ template class ${obj};
     file(RELATIVE_PATH relfile ${PROJECT_SOURCE_DIR} ${source})
 
     # ... and add the binary path
-    set(newsource ${PROJECT_BINARY_DIR}/${relfile})
-    get_filename_component(newdir ${newsource} DIRECTORY)
+    set(newsource ${PROJECT_BINARY_DIR}/explicit_inst_source/${relfile})
+    get_filename_component(newdir_bin ${newsource} DIRECTORY)
     get_filename_component(fname ${newsource} NAME)
 
     foreach(obj IN LISTS objects)
@@ -170,8 +177,8 @@ template class ${obj};
         # ... and substitute illegal chars
         string(MAKE_C_IDENTIFIER ${unique_name} unique_name)
 
-        set(newdir ${newdir}/${unique_name})
-        set(newsource ${newdir}/${fname})
+        set(newdir ${newdir_bin}/${unique_name})
+        set(newsource ${newdir_bin}/${fname})
         
         foreach(elem ${targets})
             # todo: more elegant way? 
@@ -184,9 +191,14 @@ template class ${obj};
                 # generate path
                 string(MAKE_C_IDENTIFIER ${elem} target_name)
                 string(MAKE_C_IDENTIFIER ${fname} source_name)
-                set(include_path "${PROJECT_BINARY_DIR}/explicit_inst/${target_name}/${source_name}")
+                set(include_path "${PROJECT_BINARY_DIR}/explicit_inst_header/${target_name}/${source_name}")
                 
-                set(target_hpp "${include_path}/${prefix}/${fname}")
+                if(prefix)
+                    set(target_hpp "${include_path}/${prefix}/${fname}")
+                else()
+                    set(target_hpp "${include_path}/${fname}")
+                endif()
+                #~ message("${target_hpp}")
                 
                 # I want to copy the file ONCE in the beginning and the only
                 # append, that why I use ${explicit_inst_processed_files}
