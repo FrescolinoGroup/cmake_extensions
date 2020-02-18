@@ -16,7 +16,7 @@ beginning of the corresponding source files for detailed usage/documentation.
 
     mkdir build
     cd build
-    cmake .. -DCMAKE_INSTAL_PREFIX="path/to/install/location"
+    cmake .. -DCMAKE_INSTALL_PREFIX="path/to/install/location"
     make install
 
 Use 'softinstall' to create symlinks instead of copies.
